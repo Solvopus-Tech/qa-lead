@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings - AgentHaven</title>
+</head>
+<body>
+  <h1>Settings</h1>
+  <form id="settings-form">
+    <label for="theme">Theme</label>
+    <select id="theme" name="theme">
+      <option value="light">Light</option>
+      <option value="dark">Dark</option>
+    </select>
+    <button type="submit">Save</button>
+  </form>
+  <div id="saved-message" style="display: none;">Settings saved</div>
+  <script>
+    document.getElementById('settings-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      document.getElementById('saved-message').style.display = 'block';
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "name": "agenthaven-web",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "npx serve -l 3000 public",
+    "test": "playwright test",
+    "test:ci": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.40.0",
+    "serve": "^14.2.0"
+  }
+}
