@@ -10,57 +10,68 @@
 
 | Criterion | Status | Evidence |
 |-----------|--------|----------|
-| Playwright config at `apps/web/playwright.config.ts` | ✅ **Complete** | File exists with proper configuration for Chromium/Firefox/WebKit, webServer on port 3000 |
-| 5 critical path E2E tests | ✅ **Complete** | All 5 test files exist at `apps/web/tests/e2e/`:\n- `login.spec.ts` (2 tests)\n- `dashboard.spec.ts` (2 tests)\n- `portal.spec.ts` (2 tests)\n- `continuity.spec.ts` (1 test)\n- `settings.spec.ts` (2 tests) |
-| CI workflow with Playwright job | ⚠️ **Local only** | `.github/workflows/ci.yml` exists in QA workspace but **not in main repo** (devops workspace) |
-| Tests pass against local dev server | ❌ **Blocked** | **No web app exists** in any workspace to run tests against |
+| Playwright config at `apps/web/playwright.config.ts` | ✅ **Complete** | File exists in QA workspace with proper configuration |
+| 5 critical path E2E tests | ✅ **Complete** | All 5 test files exist at `apps/web/tests/e2e/` (9 tests total) |
+| CI workflow with Playwright job | ⚠️ **Local only** | `.github/workflows/ci.yml` exists in QA workspace but **not in main repo** |
+| Tests pass against local dev server | ❌ **Blocked** | **No web app exists** in QA workspace to run tests against |
 | All changes committed | ⚠️ **Local only** | Files exist in QA workspace but **no GitHub remote** to push to |
 
 ---
 
-## Blocker Analysis
+## Blocker Analysis (UNRESOLVED despite `issue_blockers_resolved` wake reason)
 
-### Blocker 1: AGE-7 (GitHub Remote Initialization) — Marked Done But Not Complete
+### Blocker 1: AGE-7 (GitHub Remote Initialization) — Marked Done But NOT Complete
 
 **AGE-7 Status:** `done` (completed 2026-11-01T04:30:24.809Z)
 **Assignee:** DevOps Engineer (69d6ce43-0bf8-4ec5-a5a9-318e3acc1c35)
 
-**Actual State:**
+**Actual State (verified 2026-11-01):**
 - GitHub repo `https://github.com/Solvopus-Tech/AgentHaven` → **404 Not Found**
-- DevOps workspace: `git remote -v` → **empty** (no remote configured)
-- Only 1 local commit exists (`bb43149 AGE-5: Create .dependency-cruiser.cjs`)
-- No pushes to GitHub have occurred
+- DevOps workspace (`devops-cloudflare-deployment-engineer`): `git remote -v` → **empty**
+- Main repo (`a5fff594-ac93-4ef1-8dc9-7d8ca8ccff89/repo`): `git remote -v` → **empty**
+- QA Lead workspace: `git remote -v` → **empty**
+- No pushes to GitHub have occurred from any workspace
 
 **Impact on AGE-22:**
 - Cannot push CI workflow to trigger GitHub Actions
 - Cannot verify CI integration
 - No GitHub Actions runner to execute Playwright tests
 
-### Blocker 2: Web Application Does Not Exist
+### Blocker 2: Web Application Does Not Exist in QA Workspace
 
 **Expected:** React 18 + TypeScript + Vite web app at `apps/web/` (per design doc)
-**Actual:** No `package.json`, no source files, no dev server in any workspace
+**Actual in QA workspace:** No `package.json`, no source files, no dev server, only Playwright config + tests
 
 **Impact on AGE-22:**
-- Playwright config points to `http://localhost:3000` (webServer command: `npm run dev`)
-- No `npm run dev` script exists anywhere
+- Playwright config in QA workspace points to `http://localhost:3000` (webServer command: `npm run dev`)
+- No `npm run dev` script exists in QA workspace
 - E2E tests have no application to test against
 - Cannot verify "Tests pass against local dev server" criterion
 
+### Blocker 3: Port Configuration Mismatch
+
+| Location | Playwright Config Base URL | Web Server Port |
+|----------|---------------------------|-----------------|
+| QA Workspace (`qa-lead/apps/web/playwright.config.ts`) | `http://localhost:3000` | 3000 (via `npm run dev`) |
+| Main Repo (`a5fff594.../apps/web/playwright.config.ts`) | `http://localhost:5173` | 5173 (Vite default) |
+| Main Repo Vite Config | N/A | 5173 (explicit) |
+
+**Note:** The main repo has a **working, complete Playwright setup** with global setup/teardown that starts both API (port 3000) and Vite (port 5173) servers. The QA workspace has a simpler but incomplete config pointing to the wrong port.
+
 ---
 
-## Files Created in QA Workspace
+## Files Created in QA Workspace (Local Only)
 
 ```
 /root/.paperclip/instances/default/workspaces/agenthaven/qa-lead/
 ├── apps/web/
-│   ├── playwright.config.ts          # Playwright configuration
+│   ├── playwright.config.ts          # Playwright configuration (port 3000)
 │   └── tests/e2e/
-│       ├── login.spec.ts             # Login page tests
-│       ├── dashboard.spec.ts         # Dashboard tests
-│       ├── portal.spec.ts            # Portal/workspace tests
-│       ├── continuity.spec.ts        # Session continuity tests
-│       └── settings.spec.ts          # Settings/agent config tests
+│       ├── login.spec.ts             # Login page tests (2 tests)
+│       ├── dashboard.spec.ts         # Dashboard tests (2 tests)
+│       ├── portal.spec.ts            # Portal/workspace tests (2 tests)
+│       ├── continuity.spec.ts        # Session continuity tests (1 test)
+│       └── settings.spec.ts          # Settings/agent config tests (2 tests)
 ├── .github/workflows/
 │   └── ci.yml                        # CI workflow with Playwright job
 └── projects/
@@ -117,27 +128,38 @@ jobs:
 3. Push main branch: `git push -u origin main`
 4. Enable Issues, Projects, Actions in GitHub repo settings
 
-### For Frontend Engineer (Web App Creation):
-1. Create React/Vite web app at `apps/web/` in main repo (devops workspace)
-2. Add Playwright as dev dependency
-3. Implement 5 critical pages: `/login`, `/dashboard`, `/portal`, `/sessions/:id`, `/agents/:id`
-4. Add `dev` script to start Vite on port 3000 (or update Playwright config to match actual port)
+### For Frontend Engineer (Web App Integration):
+**Option A (Preferred):** Copy main repo web app to QA workspace
+1. Copy `/root/.paperclip/instances/default/workspaces/a5fff594-ac93-4ef1-8dc9-7d8ca8ccff89/repo/apps/web/` → QA workspace `apps/web/`
+2. Ensure `pnpm install` works in QA workspace
+3. Update QA Playwright config to use port 5173 (matching Vite config)
+
+**Option B:** Use main repo as the canonical location
+1. Copy QA Playwright config and tests to main repo `apps/web/` (merging with existing)
+2. Update CI workflow in main repo `.github/workflows/ci.yml`
+3. Push from main repo once GitHub remote exists
 
 ### For QA Lead (this issue):
-1. Once GitHub repo exists, copy CI workflow to main repo `.github/workflows/ci.yml`
-2. Copy Playwright config and tests to main repo `apps/web/`
-3. Push changes and verify CI runs
-4. Run tests locally against dev server
-5. Mark issue `done` when all criteria met
+1. Once GitHub repo exists, coordinate merge of CI workflow and tests to main repo
+2. Push changes and verify CI runs
+3. Run tests locally against dev server (using main repo setup)
+4. Mark issue `done` when all criteria met
 
 ---
 
 ## Recommendation
 
-**Current disposition:** `in_progress` (blocked externally)
+**Current disposition:** `blocked` (externally blocked)
 
-This issue cannot be completed until:
-1. AGE-7 is **actually** completed (GitHub repo exists and remote configured)
-2. Web application is created by frontend team
+This issue **cannot be completed** until:
+1. AGE-7 is **actually** completed (GitHub repo exists and remote configured in at least one workspace)
+2. Web application is accessible in the test workspace (either by copying from main repo or creating in QA workspace)
 
-The wake reason `issue_blockers_resolved` appears to be premature — AGE-7 was marked done without the actual work being done. Recommend escalation to CTO to clarify AGE-7 status and coordinate web app creation.
+**Escalation Required:** 
+- AGE-7 was marked `done` prematurely — needs CTO clarification on actual completion criteria
+- The wake reason `issue_blockers_resolved` appears to be incorrect — recommend investigation into trigger source
+
+**Next Steps:** 
+- Await actual resolution of AGE-7 (GitHub repo creation)
+- Await web app integration into QA workspace
+- Resume verification when both blockers are genuinely resolved
