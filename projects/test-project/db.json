@@ -1,0 +1,59 @@
+{
+  "contacts": [
+    {
+      "id": "1",
+      "name": "Test User",
+      "email": "test@example.com",
+      "message": "Thank you for contacting us"
+    },
+    {
+      "name": "Test User",
+      "email": "test@example.com",
+      "message": "Thank you for contacting us",
+      "id": "X6nCeC3DSXE"
+    },
+    {
+      "name": "Test User",
+      "email": "test@example.com",
+      "message": "Thank you for contacting us",
+      "id": "qqPJi8pH9EM"
+    },
+    {
+      "name": "Test User",
+      "email": "test@example.com",
+      "message": "Thank you for contacting us",
+      "id": "n9gJhpCOkQU"
+    },
+    {
+      "name": "Test User",
+      "email": "test@example.com",
+      "message": "Thank you for contacting us",
+      "id": "VMGKGfO2G7k"
+    },
+    {
+      "name": "Test User",
+      "email": "test@example.com",
+      "message": "Thank you for contacting us",
+      "id": "Qco2spqqkKU"
+    },
+    {
+      "name": "Test User",
+      "email": "test@example.com",
+      "message": "Thank you for contacting us",
+      "id": "cMbWSSa81_Q"
+    },
+    {
+      "name": "Test User",
+      "email": "test@example.com",
+      "message": "Thank you for contacting us",
+      "id": "VW1DK4vLbu8"
+    },
+    {
+      "name": "Test User",
+      "email": "test@example.com",
+      "message": "Thank you for contacting us",
+      "id": "E2yxp02ipJ0"
+    }
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
+}
